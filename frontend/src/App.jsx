@@ -4,6 +4,12 @@ import CssBaseline from '@mui/material/CssBaseline';
 import DashboardLayout from './components/layout/DashboardLayout';
 import Students from './components/admin/Students';
 import Drives from './components/admin/Drives';
+import Dashboard from './components/admin/Dashboard';
+import StudentLogin from './components/auth/StudentLogin';
+import AdminLogin from './components/auth/AdminLogin';
+import StudentDashboard from './components/student/StudentDashboard';
+import ProtectedRoute from './components/auth/ProtectedRoute';
+import { AuthProvider } from './context/AuthContext';
 
 const theme = createTheme({
   palette: {
@@ -20,16 +26,40 @@ function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-        <Routes>
-          <Route path="/" element={<Navigate to="/admin" replace />} />
-          <Route path="/admin" element={<DashboardLayout />}>
-            <Route path="students" element={<Students />} />
-            <Route path="drives" element={<Drives />} />
-            <Route index element={<Students />} />
-          </Route>
-        </Routes>
-      </Router>
+      <AuthProvider>
+        <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+          <Routes>
+            <Route path="/" element={<Navigate to="/student/login" replace />} />
+            
+            {/* Student Routes */}
+            <Route path="/student/login" element={<StudentLogin />} />
+            <Route 
+              path="/student/dashboard" 
+              element={
+                <ProtectedRoute requiredUserType="student">
+                  <StudentDashboard />
+                </ProtectedRoute>
+              } 
+            />
+            
+            {/* Admin Routes */}
+            <Route path="/admin/login" element={<AdminLogin />} />
+            <Route 
+              path="/admin" 
+              element={
+                <ProtectedRoute requiredUserType="admin">
+                  <DashboardLayout />
+                </ProtectedRoute>
+              }
+            >
+              <Route path="dashboard" element={<Dashboard />} />
+              <Route path="students" element={<Students />} />
+              <Route path="drives" element={<Drives />} />
+              <Route index element={<Dashboard />} />
+            </Route>
+          </Routes>
+        </Router>
+      </AuthProvider>
     </ThemeProvider>
   );
 }
