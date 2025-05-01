@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import DashboardLayout from './components/layout/DashboardLayout';
@@ -20,8 +20,9 @@ function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <Router>
+      <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <Routes>
+          <Route path="/" element={<Navigate to="/admin" replace />} />
           <Route path="/admin" element={<DashboardLayout />}>
             <Route path="students" element={<Students />} />
             <Route path="drives" element={<Drives />} />
