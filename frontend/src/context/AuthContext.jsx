@@ -2,6 +2,16 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
+// Configure axios defaults
+const api = axios.create({
+  baseURL: 'http://localhost:5000',
+  withCredentials: true,
+  headers: {
+    'Content-Type': 'application/json',
+    'X-Requested-With': 'XMLHttpRequest'
+  }
+});
+
 const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
@@ -15,11 +25,11 @@ export const AuthProvider = ({ children }) => {
     
     if (studentToken) {
       setUserType('student');
-      axios.defaults.headers.common['Authorization'] = `Bearer ${studentToken}`;
+      api.defaults.headers.common['Authorization'] = `Bearer ${studentToken}`;
       fetchUserProfile('student');
     } else if (adminToken) {
       setUserType('admin');
-      axios.defaults.headers.common['Authorization'] = `Bearer ${adminToken}`;
+      api.defaults.headers.common['Authorization'] = `Bearer ${adminToken}`;
       fetchUserProfile('admin');
     } else {
       setLoading(false);
@@ -29,10 +39,10 @@ export const AuthProvider = ({ children }) => {
   const fetchUserProfile = async (type) => {
     try {
       const endpoint = type === 'student' 
-        ? 'http://localhost:5000/api/student/profile'
-        : 'http://localhost:5000/api/admin/profile';
+        ? '/api/student/profile'
+        : '/api/admin/profile';
       
-      const response = await axios.get(endpoint);
+      const response = await api.get(endpoint);
       setUser(response.data);
     } catch (error) {
       console.error('Error fetching user profile:', error);
@@ -45,10 +55,10 @@ export const AuthProvider = ({ children }) => {
   const login = async (credentials, type) => {
     try {
       const endpoint = type === 'student'
-        ? 'http://localhost:5000/api/auth/student/login'
-        : 'http://localhost:5000/api/auth/admin/login';
+        ? '/api/auth/student/login'
+        : '/api/auth/admin/login';
       
-      const response = await axios.post(endpoint, credentials);
+      const response = await api.post(endpoint, credentials);
       const { token } = response.data;
       
       if (type === 'student') {
@@ -58,7 +68,7 @@ export const AuthProvider = ({ children }) => {
       }
       
       setUserType(type);
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
       await fetchUserProfile(type);
       return true;
     } catch (error) {
@@ -70,7 +80,7 @@ export const AuthProvider = ({ children }) => {
   const handleLogout = () => {
     localStorage.removeItem('studentToken');
     localStorage.removeItem('adminToken');
-    delete axios.defaults.headers.common['Authorization'];
+    delete api.defaults.headers.common['Authorization'];
     setUser(null);
     setUserType(null);
   };
@@ -81,6 +91,7 @@ export const AuthProvider = ({ children }) => {
     loading,
     login,
     logout: handleLogout,
+    api,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

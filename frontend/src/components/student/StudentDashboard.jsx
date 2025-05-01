@@ -25,19 +25,10 @@ import {
   Cancel as CancelIcon,
   Edit as EditIcon,
 } from '@mui/icons-material';
-import axios from 'axios';
-
-// Configure axios defaults
-const api = axios.create({
-  baseURL: 'http://localhost:5000',
-  withCredentials: true,
-  headers: {
-    'Content-Type': 'application/json',
-    'X-Requested-With': 'XMLHttpRequest'
-  }
-});
+import { useAuth } from '../../context/AuthContext';
 
 const StudentDashboard = () => {
+  const { api } = useAuth();
   const [drives, setDrives] = useState([]);
   const [applications, setApplications] = useState([]);
   const [profile, setProfile] = useState(null);
